@@ -1,0 +1,229 @@
+/* ── Map page root ─────────────────────────────────────────────────────── */
+.mapview-root {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+  min-height: 0;
+  flex: 1;
+}
+
+.mapview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.mapview-header h1 {
+  color: var(--text);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.last-update {
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  margin-left: 10px;
+}
+
+/* ── Layer toggle ──────────────────────────────────────────────────────── */
+.layer-toggle { display: flex; gap: 6px; }
+
+.layer-toggle button {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-secondary);
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 500;
+  transition: all 0.15s;
+}
+
+.layer-toggle button.active,
+.layer-toggle button:hover {
+  background: var(--accent-light);
+  color: var(--accent);
+  border-color: var(--accent-border);
+}
+
+/* ── Map body ──────────────────────────────────────────────────────────── */
+.mapview-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 12px;
+}
+
+/* ── Map wrapper ───────────────────────────────────────────────────────── */
+.map-wrap {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  border-radius: var(--radius);
+  overflow: hidden;
+  position: relative;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.map-wrap .leaflet-container {
+  height: 100% !important;
+  width: 100% !important;
+  background: #e8edf2;
+}
+
+.map-badge {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  z-index: 1000;
+  background: rgba(255,255,255,0.95);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  pointer-events: none;
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(4px);
+}
+
+/* ── Side panel ────────────────────────────────────────────────────────── */
+.side-panel {
+  width: 250px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.panel-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
+}
+
+.panel-section h3 {
+  color: var(--text);
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ── Vessel list ───────────────────────────────────────────────────────── */
+.vessel-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 6px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.vessel-row:hover,
+.vessel-row.selected { background: var(--surface-2); }
+
+.dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.dot.active   { background: var(--success); box-shadow: 0 0 0 2px rgba(16,185,129,0.2); }
+.dot.alert    { background: var(--danger);  box-shadow: 0 0 0 2px rgba(239,68,68,0.2); }
+.dot.inactive { background: var(--text-muted); }
+
+.vessel-name { font-size: 0.84rem; font-weight: 600; color: var(--text); }
+.vessel-meta { font-size: 0.73rem; color: var(--text-muted); }
+
+/* ── Weather panel ─────────────────────────────────────────────────────── */
+.weather-loading { color: var(--text-muted); font-size: 0.82rem; }
+.weather-error   { color: var(--danger); font-size: 0.82rem; }
+.weather-grid    { display: flex; flex-direction: column; gap: 5px; }
+
+.weather-main {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 0; border-bottom: 1px solid var(--border-light); margin-bottom: 4px;
+}
+.weather-emoji { font-size: 1.6rem; }
+.weather-temp  { font-size: 1.4rem; font-weight: 700; color: var(--accent); }
+.weather-desc  { font-size: 0.73rem; color: var(--text-muted); text-transform: capitalize; }
+
+.weather-row {
+  display: flex; justify-content: space-between;
+  font-size: 0.76rem; color: var(--text); padding: 2px 0;
+}
+.weather-row span:first-child { color: var(--text-muted); }
+
+.advisory {
+  margin-top: 6px; padding: 7px 10px; border-radius: var(--radius-sm);
+  font-size: 0.74rem; font-weight: 600; line-height: 1.5;
+}
+.advisory.safe   { background: var(--success-light); color: #065f46; border: 1px solid #a7f3d0; }
+.advisory.danger { background: var(--danger-light);  color: #991b1b; border: 1px solid #fca5a5; }
+
+/* ── Leaflet popup ─────────────────────────────────────────────────────── */
+.vessel-popup { font-family: 'Segoe UI', sans-serif; font-size: 12px; min-width: 150px; color: #2d3748; line-height: 1.6; }
+.vessel-popup strong { display: block; font-size: 13px; font-weight: 700; margin-bottom: 4px; color: #1a202c; }
+.popup-status { display: inline-block; font-size: 10px; padding: 1px 8px; border-radius: 10px; margin-bottom: 6px; font-weight: 600; }
+.popup-status.active   { background: #d1fae5; color: #065f46; }
+.popup-status.alert    { background: #fee2e2; color: #991b1b; }
+.popup-status.inactive { background: #f1f5f9; color: #64748b; }
+.popup-status.offline  { background: #e5e7eb; color: #6b7280; }
+
+/* ════════════════════════════════════════════════════════════════════════
+   MOBILE MAP — full screen map with collapsible panel
+════════════════════════════════════════════════════════════════════════ */
+.mobile-layout .mapview-root {
+  height: auto;
+  flex: none;
+  min-height: 0;
+  gap: 8px;
+}
+
+/* Map fills full phone width at fixed height */
+.mobile-layout .mapview-body {
+  flex-direction: column;
+  flex: none;
+  min-height: 0;
+  gap: 8px;
+}
+
+.mobile-layout .map-wrap {
+  flex: none;
+  width: 100%;
+  /* Fill most of the visible screen height */
+  height: calc(100vw * 1.1);
+  max-height: 420px;
+  min-height: 260px;
+  border-radius: 10px;
+}
+
+/* Side panel becomes horizontal scroll row on mobile */
+.mobile-layout .side-panel {
+  width: 100%;
+  flex-direction: row;
+  overflow-x: auto;
+  overflow-y: hidden;
+  flex-wrap: nowrap;
+  gap: 8px;
+  padding-bottom: 4px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mobile-layout .panel-section {
+  min-width: 200px;
+  max-width: 240px;
+  flex-shrink: 0;
+}
+
+/* Hide header title on mobile — already shown in page bar */
+.mobile-layout .mapview-header h1 { font-size: 0.85rem; }
+.mobile-layout .last-update       { display: none; }
+.mobile-layout .layer-toggle button { padding: 4px 8px; font-size: 0.72rem; }

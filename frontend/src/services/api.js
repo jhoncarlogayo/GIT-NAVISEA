@@ -1,0 +1,182 @@
+// All Firebase Realtime Database operations for NaviSea
+import { db } from './firebase'
+import {
+  ref, set, push, update, remove, get,
+  onValue, off, serverTimestamp
+} from 'firebase/database'
+
+// ── VESSELS ──────────────────────────────────────────────────────────────
+
+// Listen to all vessels in realtime (calls callback on every change)
+export function listenVessels(callback) {
+  const r = ref(db, 'vessels')
+  onValue(r, snap => {
+    const data = snap.val() ?? {}
+    const list = Object.entries(data).map(([id, v]) => ({ id, ...v }))
+    callback(list)
+  })
+  return () => off(r) // returns unsubscribe function
+}
+
+// Add a new vessel
+export function addVessel(vessel) {
+  const r = push(ref(db, 'vessels'))
+  return set(r, { ...vessel, createdAt: serverTimestamp(), updatedAt: serverTimestamp() })
+}
+
+// Update a vessel
+export function updateVessel(id, data) {
+  return update(ref(db, `vessels/${id}`), { ...data, updatedAt: serverTimestamp() })
+}
+
+// Delete a vessel
+export function deleteVessel(id) {
+  return remove(ref(db, `vessels/${id}`))
+}
+
+// Update vessel position (called by sensor data)
+export function updateVesselPosition(id, data) {
+  return update(ref(db, `vessels/${id}`), { ...data, updatedAt: serverTimestamp() })
+}
+
+// ── ALERTS ───────────────────────────────────────────────────────────────
+
+// Listen to all alerts in realtime
+export function listenAlerts(callback) {
+  const r = ref(db, 'alerts')
+  onValue(r, snap => {
+    const data = snap.val() ?? {}
+    const list = Object.entries(data)
+      .map(([id, a]) => ({ id, ...a }))
+      .sort((a, b) => (b.createdAt ?? 0) - (a.createdAt ?? 0))
+    callback(list)
+  })
+  return () => off(r)
+}
+
+// Add a new alert
+export function addAlert(alert) {
+  return push(ref(db, 'alerts'), { ...alert, acknowledged: false, createdAt: serverTimestamp() })
+}
+
+// Acknowledge an alert
+export function acknowledgeAlert(id) {
+  return update(ref(db, `alerts/${id}`), { acknowledged: true })
+}
+
+// ── SENSOR DATA ──────────────────────────────────────────────────────────
+
+// Push a new sensor reading (called by Arduino via PHP bridge or directly)
+export function pushSensorData(vesselId, data) {
+  const entry = { vesselId, ...data, recordedAt: serverTimestamp() }
+  // Save to sensor_data log
+  push(ref(db, `sensor_data/${vesselId}`), entry)
+  // Update vessel live position
+  return updateVesselPosition(vesselId, {
+    latitude:     data.latitude,
+    longitude:    data.longitude,
+    speed:        data.speed,
+    heading:      data.heading,
+    temperature:  data.temperature,
+    batteryLevel: data.battery_level,
+    status:       'active',
+    lastSeenAt:   Date.now(),
+  })
+}
+
+// ── RESTRICTED ZONES ─────────────────────────────────────────────────────
+
+export function listenZones(callback) {
+  const r = ref(db, 'restricted_zones')
+  onValue(r, snap => {
+    const data = snap.val() ?? {}
+    const list = Object.entries(data).map(([id, z]) => ({ id, ...z }))
+    callback(list)
+  })
+  return () => off(r)
+}
+
+// Listen to live vessel tracking — reads directly from /vessels table
+export function listenTracking(callback) {
+  const r = ref(db, 'vessels')
+  onValue(r, snap => {
+    const data    = snap.val() ?? {}
+    const vessels = Object.entries(data).map(([id, v]) => ({ id, ...v }))
+    const vessel  = vessels.find(v => {
+      const lat = parseFloat(v.latitude)
+      const lng = parseFloat(v.longitude)
+      return !isNaN(lat) && !isNaN(lng) && (lat !== 0 || lng !== 0)
+    })
+    if (vessel) {
+      const lat  = parseFloat(vessel.latitude)
+      const lng  = parseFloat(vessel.longitude)
+      const name = vessel.name || vessel.vesselName || vessel.mmsi || `Vessel-${vessel.id?.slice(-4)}`
+      callback({ lat, lng,
+        speed:      parseFloat(vessel.speed) || 0,
+        heading:    parseFloat(vessel.heading) || 0,
+        status:     vessel.status ?? 'active',
+        vesselName: name,
+        vesselId:   vessel.id,
+        ts:         vessel.updatedAt ?? Date.now(),
+      })
+    } else {
+      callback(null)
+    }
+  })
+  return () => off(r)
+}
+
+// Push a zone violation alert
+export function pushViolationAlert(vesselName, zoneName, zoneType, lat, lng, distToEdge, status) {
+  const isBreach = status === 'BREACH'
+  return push(ref(db, 'alerts'), {
+    vesselName,
+    alertType:  'zone_violation',
+    severity:   isBreach ? 'critical' : 'warning',
+    zoneName,
+    zoneType,
+    latitude:   lat,
+    longitude:  lng,
+    distanceM:  Math.round(distToEdge),
+    status,
+    message:    isBreach
+      ? `${vesselName} is INSIDE restricted zone "${zoneName}"!`
+      : `${vesselName} is ${Math.round(distToEdge)}m from the edge of "${zoneName}" at low speed`,
+    acknowledged: false,
+    createdAt:    Date.now(),
+  })
+}
+
+// Mark exit time on the most recent unexited alert for a vessel+zone
+export async function markViolationExit(vesselName, zoneName, exitedAt) {
+  const snap = await get(ref(db, 'alerts'))
+  if (!snap.exists()) return
+  const entries = Object.entries(snap.val())
+    .filter(([, a]) =>
+      a.vesselName === vesselName &&
+      a.zoneName   === zoneName   &&
+      !a.exitedAt
+    )
+    .sort((a, b) => (b[1].createdAt ?? 0) - (a[1].createdAt ?? 0))
+  if (entries.length === 0) return
+  const [latestId] = entries[0]
+  return update(ref(db, `alerts/${latestId}`), { exitedAt })
+}
+
+export function addZone(zone) {
+  return push(ref(db, 'restricted_zones'), { ...zone, createdAt: serverTimestamp() })
+}
+
+export function updateZone(id, data) {
+  return update(ref(db, `restricted_zones/${id}`), data)
+}
+
+export function deleteZone(id) {
+  return remove(ref(db, `restricted_zones/${id}`))
+}
+
+// ── WEATHER (still via PHP proxy to keep API key server-side) ─────────────
+import axios from 'axios'
+const phpApi = axios.create({ baseURL: 'http://localhost/navicap/backend/api' })
+export const fetchWeather = (lat, lon) =>
+  phpApi.get(`/weather.php?lat=${lat}&lon=${lon}`).then(r => r.data)

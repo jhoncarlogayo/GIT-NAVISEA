@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none">
+  <!-- Outer circle -->
+  <circle cx="60" cy="60" r="56" fill="#1e3a5f" stroke="#2563eb" stroke-width="3"/>
+
+  <!-- Anchor body -->
+  <line x1="60" y1="22" x2="60" y2="82" stroke="#60a5fa" stroke-width="5" stroke-linecap="round"/>
+  <!-- Anchor crossbar -->
+  <line x1="38" y1="36" x2="82" y2="36" stroke="#60a5fa" stroke-width="5" stroke-linecap="round"/>
+  <!-- Anchor ring -->
+  <circle cx="60" cy="22" r="7" stroke="#60a5fa" stroke-width="4" fill="none"/>
+  <!-- Anchor left arm -->
+  <path d="M60 82 Q42 90 38 80" stroke="#60a5fa" stroke-width="5" stroke-linecap="round" fill="none"/>
+  <!-- Anchor right arm -->
+  <path d="M60 82 Q78 90 82 80" stroke="#60a5fa" stroke-width="5" stroke-linecap="round" fill="none"/>
+
+  <!-- Wave 1 -->
+  <path d="M20 98 Q30 92 40 98 Q50 104 60 98 Q70 92 80 98 Q90 104 100 98" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round" fill="none"/>
+  <!-- Wave 2 -->
+  <path d="M28 108 Q38 102 48 108 Q58 114 68 108 Q78 102 88 108 Q95 112 100 108" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.6"/>
+</svg>
