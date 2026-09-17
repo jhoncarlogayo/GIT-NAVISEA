@@ -4,12 +4,9 @@ import StatCard from '../components/StatCard'
 
 const SEV_COLOR = { critical: '#dc2626', warning: '#d97706', info: '#2563eb' }
 const SEV_BG    = { critical: '#fef2f2', warning: '#fffbeb', info: '#eff6ff' }
-const MIN_VALID_TS = 1577836800000
 const OFFLINE_MS   = 2 * 60 * 1000
-const isOnlineVessel = v => {
-  const ts = v.lastSeenAt ?? v.updatedAt
-  return ts && ts >= MIN_VALID_TS && Date.now() - ts <= OFFLINE_MS
-}
+const isOnlineVessel = v =>
+  v.lastSeenAt && Date.now() - v.lastSeenAt <= OFFLINE_MS
 const STATUS_CLASS = {
   active:   'bg-green-100 text-green-700',
   inactive: 'bg-slate-100 text-slate-500',

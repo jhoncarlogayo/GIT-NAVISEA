@@ -2,12 +2,9 @@ import { useEffect, useState } from 'react'
 import { listenVessels, addVessel, updateVessel, deleteVessel } from '../services/api'
 
 const OFFLINE_MS = 2 * 60 * 1000
-const MIN_VALID_TS = 1577836800000
 const getStatus = v => {
-  const ts = v.lastSeenAt ?? v.updatedAt
-  if (!ts || ts < MIN_VALID_TS) return 'offline'
-  if (Date.now() - ts > OFFLINE_MS) return 'offline'
-  return v.status || 'active'
+  if (!v.lastSeenAt || Date.now() - v.lastSeenAt > OFFLINE_MS) return 'offline'
+  return 'active'
 }
 const STATUS_STYLE = {
   active:  { bg: '#dcfce7', color: '#15803d' },
@@ -134,7 +131,7 @@ export default function Vessels() {
                 </div>
                 <span className="text-xs font-bold px-2.5 py-1 rounded-full flex-shrink-0"
                   style={{ background: st.bg, color: st.color }}>
-                  {s === 'offline' ? '⚫ Offline' : s === 'active' ? '🟢 Live' : s}
+                  {s === 'offline' ? '⚫ Offline' : '🟢 Live'}
                 </span>
               </div>
 
@@ -151,7 +148,7 @@ export default function Vessels() {
 
               <div className="flex items-center justify-between">
                 <span className="text-xs text-slate-400">
-                  {ts ? `Updated ${new Date(ts).toLocaleTimeString()}` : 'Never updated'}
+                  {v.lastSeenAt ? `Last seen ${new Date(v.lastSeenAt).toLocaleTimeString()}` : 'Never seen'}
                 </span>
                 <div className="flex gap-2">
                   <button onClick={() => openEdit(v)}

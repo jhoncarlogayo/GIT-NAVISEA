@@ -6,7 +6,6 @@ import { ref, update } from 'firebase/database'
 const NOTIF_INTERVAL_MS = 10 * 1000
 const ALERT_INTERVAL_MS = 10 * 1000
 const OFFLINE_MS        = 2 * 60 * 1000
-const MIN_VALID_TS      = 1577836800000  // Jan 1 2020 — below this = millis() not Unix time
 
 function getDistance(lat1, lon1, lat2, lon2) {
   const R    = 6371000
@@ -84,8 +83,8 @@ export function useZoneMonitor({ onNewAlert } = {}) {
     })
     const unsubTrack = listenVessels(vessels => {
       vessels.forEach(v => {
-        const ts = v.lastSeenAt ?? v.updatedAt
-        if (!ts || ts < MIN_VALID_TS || Date.now() - ts > OFFLINE_MS) return  // skip offline vessels
+        const ts = v.lastSeenAt
+        if (!ts || Date.now() - ts > OFFLINE_MS) return  // skip offline vessels
         const lat = parseFloat(v.latitude)
         const lng = parseFloat(v.longitude)
         if (!lat && !lng) return

@@ -22,11 +22,9 @@ L.Icon.Default.mergeOptions({
 })
 
 const OFFLINE_MS = 2 * 60 * 1000
-const MIN_VALID_TS = 1577836800000  // Jan 1 2020 — anything below is millis() not Unix time
 function isOffline(v) {
-  const ts = v.lastSeenAt
-  if (!ts || ts < MIN_VALID_TS) return true
-  return Date.now() - ts > OFFLINE_MS
+  if (!v.lastSeenAt) return true
+  return Date.now() - v.lastSeenAt > OFFLINE_MS
 }
 
 function vesselIcon(heading = 0, color = '#00ff9d', offline = false) {

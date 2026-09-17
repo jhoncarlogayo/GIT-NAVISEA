@@ -8,30 +8,11 @@ import {
 // ── VESSELS ──────────────────────────────────────────────────────────────
 
 // Listen to all vessels in realtime (calls callback on every change)
-const vesselLastSeen = {}  // track last time each vessel's coords changed
 export function listenVessels(callback) {
   const r = ref(db, 'vessels')
   onValue(r, snap => {
     const data = snap.val() ?? {}
-    const now = Date.now()
-    const MIN_VALID_TS = 1577836800000
-    const list = Object.entries(data).map(([id, v]) => {
-      const ts = v.lastSeenAt
-      const isValidTs = ts && ts >= MIN_VALID_TS
-
-      if (isValidTs) {
-        // Arduino has valid NTP — update web-side tracker too
-        vesselLastSeen[id] = { key: `${v.latitude},${v.longitude}`, ts }
-      } else {
-        // Arduino timestamp is bad (millis) — track coord changes on web side
-        const coordKey = `${v.latitude},${v.longitude}`
-        if (!vesselLastSeen[id] || vesselLastSeen[id].key !== coordKey) {
-          vesselLastSeen[id] = { key: coordKey, ts: now }
-        }
-      }
-
-      return { id, ...v, lastSeenAt: vesselLastSeen[id]?.ts ?? null }
-    })
+    const list = Object.entries(data).map(([id, v]) => ({ id, ...v }))
     callback(list)
   })
   return () => off(r)
