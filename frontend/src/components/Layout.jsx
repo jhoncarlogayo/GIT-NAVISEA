@@ -74,9 +74,10 @@ export default function Layout() {
 
   const pageTitle = PAGE_TITLES[location.pathname] ?? 'NaviSea'
   const OFFLINE_MS = 2 * 60 * 1000
+  const MIN_VALID_TS = 1577836800000
   const activeVessels = vessels.filter(v => {
     const ts = v.lastSeenAt ?? v.updatedAt
-    return ts && Date.now() - ts <= OFFLINE_MS
+    return ts && ts >= MIN_VALID_TS && Date.now() - ts <= OFFLINE_MS
   }).length
 
   const statusPill = vessels.length > 0 ? (

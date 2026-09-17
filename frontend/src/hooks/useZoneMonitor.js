@@ -1,10 +1,12 @@
 import { useEffect, useRef } from 'react'
-import { listenTracking, listenZones, pushViolationAlert, markViolationExit } from '../services/api'
+import { listenVessels, listenZones, pushViolationAlert, markViolationExit } from '../services/api'
 import { db } from '../services/firebase'
 import { ref, update } from 'firebase/database'
 
 const NOTIF_INTERVAL_MS = 10 * 1000
 const ALERT_INTERVAL_MS = 10 * 1000
+const OFFLINE_MS        = 2 * 60 * 1000
+const MIN_VALID_TS      = 1577836800000  // Jan 1 2020 — below this = millis() not Unix time
 
 function getDistance(lat1, lon1, lat2, lon2) {
   const R    = 6371000
@@ -80,9 +82,21 @@ export function useZoneMonitor({ onNewAlert } = {}) {
     const unsubZones = listenZones(zones => {
       zonesRef.current = zones.filter(z => z.active && z.lat && z.lng && z.radius)
     })
-    const unsubTrack = listenTracking(tracking => {
-      if (!tracking || !tracking.lat || !tracking.lng) return
-      checkViolations(tracking)
+    const unsubTrack = listenVessels(vessels => {
+      vessels.forEach(v => {
+        const ts = v.lastSeenAt ?? v.updatedAt
+        if (!ts || ts < MIN_VALID_TS || Date.now() - ts > OFFLINE_MS) return  // skip offline vessels
+        const lat = parseFloat(v.latitude)
+        const lng = parseFloat(v.longitude)
+        if (!lat && !lng) return
+        checkViolations({
+          lat,
+          lng,
+          speed:      parseFloat(v.speed) || 0,
+          vesselName: v.name,
+          vesselId:   v.id,
+        })
+      })
     })
     return () => { unsubZones(); unsubTrack() }
   }, [])
@@ -95,11 +109,13 @@ export function useZoneMonitor({ onNewAlert } = {}) {
     zonesRef.current.forEach(zone => {
       const dist       = getDistance(lat, lng, parseFloat(zone.lat), parseFloat(zone.lng))
       const distToEdge = Math.max(0, dist - parseFloat(zone.radius))
-      const isBreach   = distToEdge < 3   // 3m tolerance para sa GPS drift
+      const isBreach   = distToEdge < 3
       const isWarning  = distToEdge >= 3 && distToEdge <= 20 && (speed ?? 0) <= 10
 
+      const timerKey = `${vesselId}_${zone.id}`
+
       if (!isBreach && !isWarning) {
-        delete zoneTimersRef.current[zone.id]
+        delete zoneTimersRef.current[timerKey]
         return
       }
 
@@ -110,10 +126,10 @@ export function useZoneMonitor({ onNewAlert } = {}) {
         ? `${vesselName} is INSIDE restricted zone "${zone.name}"!`
         : `${vesselName} is ${Math.round(distToEdge)}m from "${zone.name}" at low speed`
 
-      if (!zoneTimersRef.current[zone.id]) {
-        zoneTimersRef.current[zone.id] = { lastNotif: 0, lastAlert: 0 }
+      if (!zoneTimersRef.current[timerKey]) {
+        zoneTimersRef.current[timerKey] = { lastNotif: 0, lastAlert: 0 }
       }
-      const timers = zoneTimersRef.current[zone.id]
+      const timers = zoneTimersRef.current[timerKey]
 
       if (now - timers.lastNotif >= NOTIF_INTERVAL_MS) {
         timers.lastNotif = now

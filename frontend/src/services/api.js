@@ -175,8 +175,32 @@ export function deleteZone(id) {
   return remove(ref(db, `restricted_zones/${id}`))
 }
 
-// ── WEATHER (still via PHP proxy to keep API key server-side) ─────────────
+// ── WEATHER (direct OpenWeatherMap — no PHP proxy needed) ───────────────
 import axios from 'axios'
-const phpApi = axios.create({ baseURL: 'http://localhost/navicap/backend/api' })
-export const fetchWeather = (lat, lon) =>
-  phpApi.get(`/weather.php?lat=${lat}&lon=${lon}`).then(r => r.data)
+const OWM_KEY = '093258366a1433573166053d28fb591e'
+const owm = axios.create({ baseURL: 'https://api.openweathermap.org/data/2.5' })
+
+export const fetchWeather = async (lat, lon) => {
+  const { data: d } = await owm.get(`/weather?lat=${lat}&lon=${lon}&units=metric&appid=${OWM_KEY}`)
+  return {
+    temp:        round(d.main.temp),
+    feels_like:  round(d.main.feels_like),
+    temp_min:    round(d.main.temp_min),
+    temp_max:    round(d.main.temp_max),
+    humidity:    d.main.humidity,
+    pressure:    d.main.pressure,
+    wind_speed:  d.wind.speed,
+    wind_deg:    d.wind.deg,
+    wind_gust:   d.wind.gust ?? 0,
+    visibility:  round((d.visibility ?? 0) / 1000, 1),
+    condition:   d.weather[0].main,
+    description: d.weather[0].description,
+    icon:        d.weather[0].icon,
+    clouds:      d.clouds.all,
+    sunrise:     d.sys.sunrise,
+    sunset:      d.sys.sunset,
+    city:        d.name,
+  }
+}
+
+function round(n, dec = 1) { return Math.round(n * 10 ** dec) / 10 ** dec }

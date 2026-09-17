@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react'
 import { listenVessels, addVessel, updateVessel, deleteVessel } from '../services/api'
 
 const OFFLINE_MS = 2 * 60 * 1000
+const MIN_VALID_TS = 1577836800000
 const getStatus = v => {
   const ts = v.lastSeenAt ?? v.updatedAt
-  if (!ts || Date.now() - ts > OFFLINE_MS) return 'offline'
-  return v.status || 'inactive'
+  if (!ts || ts < MIN_VALID_TS) return 'offline'
+  if (Date.now() - ts > OFFLINE_MS) return 'offline'
+  return v.status || 'active'
 }
 const STATUS_STYLE = {
   active:  { bg: '#dcfce7', color: '#15803d' },

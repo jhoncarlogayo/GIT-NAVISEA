@@ -2,13 +2,13 @@ import { initializeApp } from 'firebase/app'
 import { getDatabase } from 'firebase/database'
 
 const firebaseConfig = {
-  apiKey:            "AIzaSyD7m7yoWo8rlzcoQ5_RUh4mwUCp8AEJ9N8",
-  authDomain:        "navisea-fe61d.firebaseapp.com",
-  databaseURL:       "https://navisea-fe61d-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId:         "navisea-fe61d",
-  storageBucket:     "navisea-fe61d.firebasestorage.app",
-  messagingSenderId: "802016658008",
-  appId:             "1:802016658008:web:24f62371ed57450514002d",
+  apiKey:            import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  databaseURL:       import.meta.env.VITE_FIREBASE_DATABASE_URL,
+  projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId:             import.meta.env.VITE_FIREBASE_APP_ID,
 }
 
 const app = initializeApp(firebaseConfig)

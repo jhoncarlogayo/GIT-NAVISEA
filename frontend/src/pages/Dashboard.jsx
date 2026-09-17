@@ -4,6 +4,12 @@ import StatCard from '../components/StatCard'
 
 const SEV_COLOR = { critical: '#dc2626', warning: '#d97706', info: '#2563eb' }
 const SEV_BG    = { critical: '#fef2f2', warning: '#fffbeb', info: '#eff6ff' }
+const MIN_VALID_TS = 1577836800000
+const OFFLINE_MS   = 2 * 60 * 1000
+const isOnlineVessel = v => {
+  const ts = v.lastSeenAt ?? v.updatedAt
+  return ts && ts >= MIN_VALID_TS && Date.now() - ts <= OFFLINE_MS
+}
 const STATUS_CLASS = {
   active:   'bg-green-100 text-green-700',
   inactive: 'bg-slate-100 text-slate-500',
@@ -45,7 +51,7 @@ export default function Dashboard() {
   }, [])
 
   const totalVessels   = vessels.length
-  const onlineVessels  = vessels.filter(v => v.status === 'active').length
+  const onlineVessels  = vessels.filter(isOnlineVessel).length
   const totalAlerts    = alerts.length
   const criticalAlerts = alerts.filter(a => a.severity === 'critical').length
   const recentAlerts   = alerts.slice(0, 5)
@@ -120,7 +126,9 @@ export default function Dashboard() {
                       {v.type ?? '—'} · {v.speed != null ? `${parseFloat(v.speed).toFixed(1)} kn` : '—'} · {timeAgo(v.updatedAt)}
                     </div>
                   </div>
-                  <span className={`pill ml-2 flex-shrink-0 ${STATUS_CLASS[v.status] ?? 'bg-slate-100 text-slate-500'}`}>● {v.status}</span>
+                  <span className={`pill ml-2 flex-shrink-0 ${isOnlineVessel(v) ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'}`}>
+                    ● {isOnlineVessel(v) ? 'online' : 'offline'}
+                  </span>
                 </div>
               ))}
             </div>
