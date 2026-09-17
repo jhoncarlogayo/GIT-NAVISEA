@@ -93,6 +93,7 @@ export default function MapView() {
   const [wLoading,   setWLoading]   = useState(false)
   const [lastUpdate, setLastUpdate] = useState(null)
   const [layer,      setLayer]      = useState('street')
+  const [tick,       setTick]       = useState(0)   // forces re-render to recheck lastSeenAt
   const [isMobile,   setIsMobile]   = useState(() => window.innerWidth < 768)
   const done = useRef(false)
 
@@ -105,7 +106,9 @@ export default function MapView() {
   useEffect(() => {
     const u1 = listenVessels(data => { setVessels(data); setLastUpdate(new Date().toLocaleTimeString()) })
     const u2 = listenZones(data => setZones(data))
-    return () => { u1(); u2() }
+    // Re-render every 30s so isOffline() re-evaluates even without new Firebase data
+    const timer = setInterval(() => setTick(t => t + 1), 30_000)
+    return () => { u1(); u2(); clearInterval(timer) }
   }, [])
 
   const selectVessel = async (v) => {

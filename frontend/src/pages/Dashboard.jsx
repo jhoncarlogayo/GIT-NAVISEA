@@ -33,6 +33,7 @@ export default function Dashboard() {
   const [tracking, setTracking] = useState(null)
   const [ready,    setReady]    = useState(false)
   const [error,    setError]    = useState(null)
+  const [tick,     setTick]     = useState(0)
 
   useEffect(() => {
     try {
@@ -40,7 +41,8 @@ export default function Dashboard() {
       const u2 = listenAlerts(d  => setAlerts(d))
       const u3 = listenZones(d   => setZones(d))
       const u4 = listenTracking(d => setTracking(d && Object.keys(d).length ? d : null))
-      return () => { u1(); u2(); u3(); u4() }
+      const timer = setInterval(() => setTick(t => t + 1), 30_000)
+      return () => { u1(); u2(); u3(); u4(); clearInterval(timer) }
     } catch {
       setError('Firebase not configured. See src/services/firebase.js')
       setReady(true)

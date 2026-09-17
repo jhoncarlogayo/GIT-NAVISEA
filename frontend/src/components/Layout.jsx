@@ -46,6 +46,7 @@ export default function Layout() {
   const [toasts,    setToasts]    = useState([])
   const [collapsed, setCollapsed] = useState(false)
   const [moreOpen,  setMoreOpen]  = useState(false)
+  const [tick,      setTick]      = useState(0)
   const [isMobile,  setIsMobile]  = useState(() => window.innerWidth < 768)
 
   useEffect(() => {
@@ -58,7 +59,8 @@ export default function Layout() {
   useEffect(() => {
     const u1 = listenVessels(setVessels)
     const u2 = listenZones(setZones)
-    return () => { u1(); u2() }
+    const timer = setInterval(() => setTick(t => t + 1), 30_000)
+    return () => { u1(); u2(); clearInterval(timer) }
   }, [])
 
   const handleNewAlert = useCallback((alert) => {
