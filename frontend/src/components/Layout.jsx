@@ -41,7 +41,7 @@ const bottomTabs = [
 
 export default function Layout() {
   const { dark, toggle } = useTheme()
-  const { user, logout } = useAuth()
+  const { user, logout, role } = useAuth()
   const location = useLocation()
   const [vessels,   setVessels]   = useState([])
   const [zones,     setZones]     = useState([])
@@ -235,6 +235,15 @@ export default function Layout() {
               <div style={{ color: 'rgba(148,163,184,0.8)', fontSize: '0.72rem', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {user?.email}
               </div>
+              {role && (
+                <div style={{
+                  background: role === 'admin' ? 'rgba(234,179,8,0.2)' : role === 'patrol' ? 'rgba(16,185,129,0.2)' : 'rgba(99,102,241,0.2)',
+                  border: `1px solid ${role === 'admin' ? 'rgba(234,179,8,0.4)' : role === 'patrol' ? 'rgba(16,185,129,0.4)' : 'rgba(99,102,241,0.4)'}`,
+                  borderRadius: 6, padding: '3px 10px',
+                  color: role === 'admin' ? '#fde047' : role === 'patrol' ? '#6ee7b7' : '#a5b4fc',
+                  fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5,
+                }}>{role}</div>
+              )}
               <button onClick={logout} style={{
                 background: 'rgba(220,38,38,0.2)', border: '1px solid rgba(220,38,38,0.35)',
                 borderRadius: 6, padding: '3px 10px', color: '#fca5a5',

@@ -14,22 +14,23 @@ const labelStyle = {
 
 export default function Login() {
   const { user, login, register, loginWithGoogle, error, setError } = useAuth()
-  const [tab,      setTab]      = useState('signin') // 'signin' | 'register'
+  const [tab,      setTab]      = useState('signin')
   const [email,    setEmail]    = useState('')
   const [password, setPassword] = useState('')
   const [confirm,  setConfirm]  = useState('')
+  const [role,     setRole]     = useState('staff')
   const [loading,  setLoading]  = useState(false)
 
   if (user) return <Navigate to="/" replace />
 
-  function switchTab(t) { setTab(t); setError(''); setEmail(''); setPassword(''); setConfirm('') }
+  function switchTab(t) { setTab(t); setError(''); setEmail(''); setPassword(''); setConfirm(''); setRole('staff') }
 
   async function handleSubmit(e) {
     e.preventDefault()
     if (tab === 'register' && password !== confirm) { setError('Passwords do not match.'); return }
     setLoading(true)
     if (tab === 'signin') await login(email, password)
-    else                  await register(email, password)
+    else                  await register(email, password, role)
     setLoading(false)
   }
 
@@ -123,14 +124,31 @@ export default function Login() {
               placeholder="••••••••" style={inputStyle} />
           </div>
 
-          {tab === 'register' && (
+          {tab === 'register' && (<>
             <div>
               <label style={labelStyle}>CONFIRM PASSWORD</label>
               <input type="password" required autoComplete="new-password"
                 value={confirm} onChange={e => { setConfirm(e.target.value); setError('') }}
                 placeholder="••••••••" style={inputStyle} />
             </div>
-          )}
+
+            <div>
+              <label style={labelStyle}>ROLE</label>
+              <div style={{ display: 'flex', gap: 8 }}>
+                {['staff', 'patrol'].map(r => (
+                  <button key={r} type="button" onClick={() => setRole(r)} style={{
+                    flex: 1, padding: '9px', borderRadius: 8, border: 'none', cursor: 'pointer',
+                    fontWeight: 600, fontSize: '0.82rem', textTransform: 'capitalize',
+                    transition: 'all 0.15s',
+                    background: role === r ? 'linear-gradient(90deg, #2563eb, #1d4ed8)' : 'rgba(255,255,255,0.07)',
+                    color: role === r ? '#fff' : 'rgba(148,163,184,0.7)',
+                    border: role === r ? 'none' : '1px solid rgba(255,255,255,0.1)',
+                    boxShadow: role === r ? '0 2px 8px rgba(37,99,235,0.4)' : 'none',
+                  }}>{r.charAt(0).toUpperCase() + r.slice(1)}</button>
+                ))}
+              </div>
+            </div>
+          </>)}
 
           {error && (
             <div style={{

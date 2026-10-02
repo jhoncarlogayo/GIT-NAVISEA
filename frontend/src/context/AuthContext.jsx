@@ -1,15 +1,26 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
-import { auth } from '../services/firebase'
+import { ref, set, get } from 'firebase/database'
+import { auth, db } from '../services/firebase'
 
 const AuthContext = createContext(null)
 
 export function AuthProvider({ children }) {
-  const [user,    setUser]    = useState(undefined) // undefined = loading
+  const [user,    setUser]    = useState(undefined)
+  const [role,    setRole]    = useState(null)
   const [error,   setError]   = useState('')
 
+  async function fetchRole(uid) {
+    const snap = await get(ref(db, `/users/${uid}/role`))
+    setRole(snap.exists() ? snap.val() : null)
+  }
+
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, u => setUser(u ?? null))
+    const unsub = onAuthStateChanged(auth, u => {
+      setUser(u ?? null)
+      if (u) fetchRole(u.uid)
+      else   setRole(null)
+    })
     return unsub
   }, [])
 
@@ -24,10 +35,11 @@ export function AuthProvider({ children }) {
     }
   }
 
-  async function register(email, password) {
+  async function register(email, password, selectedRole) {
     setError('')
     try {
-      await createUserWithEmailAndPassword(auth, email, password)
+      const cred = await createUserWithEmailAndPassword(auth, email, password)
+      await set(ref(db, `/users/${cred.user.uid}`), { role: selectedRole, email })
     } catch (e) {
       setError(
         e.code === 'auth/email-already-in-use' ? 'Email already in use.' :
@@ -40,7 +52,12 @@ export function AuthProvider({ children }) {
   async function loginWithGoogle() {
     setError('')
     try {
-      await signInWithPopup(auth, new GoogleAuthProvider())
+      const cred = await signInWithPopup(auth, new GoogleAuthProvider())
+      // If new Google user, assign staff role by default
+      const snap = await get(ref(db, `/users/${cred.user.uid}/role`))
+      if (!snap.exists()) {
+        await set(ref(db, `/users/${cred.user.uid}`), { role: 'staff', email: cred.user.email })
+      }
     } catch (e) {
       if (e.code !== 'auth/popup-closed-by-user')
         setError('Google sign-in failed. Please try again.')
@@ -50,7 +67,7 @@ export function AuthProvider({ children }) {
   function logout() { signOut(auth) }
 
   return (
-    <AuthContext.Provider value={{ user, login, register, loginWithGoogle, logout, error, setError }}>
+    <AuthContext.Provider value={{ user, role, login, register, loginWithGoogle, logout, error, setError }}>
       {children}
     </AuthContext.Provider>
   )
