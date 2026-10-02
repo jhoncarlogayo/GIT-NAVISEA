@@ -198,79 +198,61 @@ export default function Layout() {
 
         {/* Topbar */}
         <header style={{
-          height: 54, flexShrink: 0,
+          height: 48, flexShrink: 0,
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '0 16px',
+          padding: '0 10px',
           background: dark ? 'linear-gradient(90deg, #1e293b, #0f172a)' : 'linear-gradient(90deg, #1e40af, #2563eb)',
           boxShadow: '0 2px 12px rgba(0,0,0,0.2)',
+          overflow: 'hidden',
         }}>
-          {/* Left: logo on mobile + page title */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {/* Mobile logo */}
+          {/* Left */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0, flex: 1 }}>
             <div className="flex md:hidden" style={{
-              width: 30, height: 30, borderRadius: 8, flexShrink: 0,
+              width: 26, height: 26, borderRadius: 7, flexShrink: 0,
               background: 'linear-gradient(135deg, #2563eb, #1d4ed8)',
-              alignItems: 'center', justifyContent: 'center',
-              fontSize: '0.95rem',
+              alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem',
             }}>⚓</div>
-            <div style={{ width: 3, height: 18, background: '#60a5fa', borderRadius: 2 }} />
-            <span style={{ color: '#fff', fontWeight: 700, fontSize: '0.95rem', letterSpacing: 0.3 }}>
+            <div style={{ width: 2, height: 14, background: '#60a5fa', borderRadius: 2, flexShrink: 0 }} />
+            <span style={{ color: '#fff', fontWeight: 700, fontSize: '0.85rem', letterSpacing: 0.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {pageTitle}
             </span>
           </div>
 
-          {/* Right */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            {/* Mobile: role badge + logout + dark mode */}
-            <div className="flex md:hidden" style={{ alignItems: 'center', gap: 6 }}>
-              {statusPill}
-              {role && (
-                <div style={{
-                  background: role === 'admin' ? 'rgba(234,179,8,0.2)' : role === 'patrol' ? 'rgba(16,185,129,0.2)' : 'rgba(99,102,241,0.2)',
-                  border: `1px solid ${role === 'admin' ? 'rgba(234,179,8,0.4)' : role === 'patrol' ? 'rgba(16,185,129,0.4)' : 'rgba(99,102,241,0.4)'}`,
-                  borderRadius: 6, padding: '2px 8px',
-                  color: role === 'admin' ? '#fde047' : role === 'patrol' ? '#6ee7b7' : '#a5b4fc',
-                  fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, whiteSpace: 'nowrap',
-                }}>{role}</div>
-              )}
-              <button onClick={logout} style={{
-                background: 'rgba(220,38,38,0.2)', border: '1px solid rgba(220,38,38,0.35)',
-                borderRadius: 6, padding: '4px 8px', color: '#fca5a5',
-                fontSize: '0.7rem', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap',
-              }}>Logout</button>
-              <div onClick={toggle} style={{ cursor: 'pointer', fontSize: '1rem', padding: '4px' }}>
-                {dark ? '☀️' : '🌙'}
-              </div>
+          {/* Right — mobile */}
+          <div className="flex md:hidden" style={{ alignItems: 'center', gap: 6, flexShrink: 0 }}>
+            <div onClick={toggle} style={{ cursor: 'pointer', fontSize: '1rem', padding: '4px' }}>
+              {dark ? '☀️' : '🌙'}
             </div>
-            {/* Desktop info */}
-            <div className="hidden md:flex" style={{ alignItems: 'center', gap: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem' }}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#34d399', display: 'inline-block', boxShadow: '0 0 6px #34d399' }} />
-                Firebase Connected
-              </div>
-              <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.72rem' }}>Calapan City, Oriental Mindoro</div>
-              <div style={{ color: 'rgba(148,163,184,0.8)', fontSize: '0.72rem', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {user?.email}
-              </div>
-              {role && (
-                <div style={{
-                  background: role === 'admin' ? 'rgba(234,179,8,0.2)' : role === 'patrol' ? 'rgba(16,185,129,0.2)' : 'rgba(99,102,241,0.2)',
-                  border: `1px solid ${role === 'admin' ? 'rgba(234,179,8,0.4)' : role === 'patrol' ? 'rgba(16,185,129,0.4)' : 'rgba(99,102,241,0.4)'}`,
-                  borderRadius: 6, padding: '3px 10px',
-                  color: role === 'admin' ? '#fde047' : role === 'patrol' ? '#6ee7b7' : '#a5b4fc',
-                  fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5,
-                }}>{role}</div>
-              )}
-              <button onClick={logout} style={{
-                background: 'rgba(220,38,38,0.2)', border: '1px solid rgba(220,38,38,0.35)',
-                borderRadius: 6, padding: '3px 10px', color: '#fca5a5',
-                fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer',
-              }}>Logout</button>
+          </div>
+
+          {/* Right — desktop */}
+          <div className="hidden md:flex" style={{ alignItems: 'center', gap: 16, flexShrink: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'rgba(255,255,255,0.7)', fontSize: '0.75rem' }}>
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#34d399', display: 'inline-block', boxShadow: '0 0 6px #34d399' }} />
+              Firebase Connected
+            </div>
+            <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.72rem' }}>Calapan City, Oriental Mindoro</div>
+            <div style={{ color: 'rgba(148,163,184,0.8)', fontSize: '0.72rem', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {user?.email}
+            </div>
+            {role && (
               <div style={{
-                background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.15)',
-                borderRadius: 6, padding: '3px 10px', color: '#fff', fontSize: '0.72rem', fontWeight: 600,
-              }}>NaviSea v1.0</div>
-            </div>
+                background: role === 'admin' ? 'rgba(234,179,8,0.2)' : role === 'patrol' ? 'rgba(16,185,129,0.2)' : 'rgba(99,102,241,0.2)',
+                border: `1px solid ${role === 'admin' ? 'rgba(234,179,8,0.4)' : role === 'patrol' ? 'rgba(16,185,129,0.4)' : 'rgba(99,102,241,0.4)'}`,
+                borderRadius: 6, padding: '3px 10px',
+                color: role === 'admin' ? '#fde047' : role === 'patrol' ? '#6ee7b7' : '#a5b4fc',
+                fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5,
+              }}>{role}</div>
+            )}
+            <button onClick={logout} style={{
+              background: 'rgba(220,38,38,0.2)', border: '1px solid rgba(220,38,38,0.35)',
+              borderRadius: 6, padding: '3px 10px', color: '#fca5a5',
+              fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer',
+            }}>Logout</button>
+            <div style={{
+              background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.15)',
+              borderRadius: 6, padding: '3px 10px', color: '#fff', fontSize: '0.72rem', fontWeight: 600,
+            }}>NaviSea v1.0</div>
           </div>
         </header>
 
@@ -324,51 +306,83 @@ export default function Layout() {
         </div>
       </nav>}
 
-      {/* ── Mobile More Drawer ── */}
+      {/* ── Mobile More Drawer — full screen modal, does NOT overlap content ── */}
       {isMobile && moreOpen && (
         <div style={{
-          position: 'fixed', bottom: 60, left: 0, right: 0, zIndex: 49,
+          position: 'fixed', inset: 0, zIndex: 60,
           background: dark ? '#0d1117' : '#0f172a',
-          borderTop: '1px solid rgba(255,255,255,0.08)',
-          boxShadow: '0 -8px 30px rgba(0,0,0,0.4)',
-          flexDirection: 'column',
-          display: 'flex',
-          padding: '8px 0',
+          display: 'flex', flexDirection: 'column', overflowY: 'auto',
         }}>
+          {/* Header */}
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.08)',
+          }}>
+            <span style={{ color: '#fff', fontWeight: 700, fontSize: '0.95rem' }}>Menu</span>
+            <button onClick={() => setMoreOpen(false)} style={{
+              background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: 8,
+              color: '#fff', fontSize: '1rem', padding: '6px 12px', cursor: 'pointer',
+            }}>✕</button>
+          </div>
+          {/* User info */}
+          <div style={{
+            padding: '14px 20px', borderBottom: '1px solid rgba(255,255,255,0.08)',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,
+          }}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ color: 'rgba(148,163,184,0.9)', fontSize: '0.78rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {user?.email}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+                {role && (
+                  <span style={{
+                    background: role === 'admin' ? 'rgba(234,179,8,0.2)' : role === 'patrol' ? 'rgba(16,185,129,0.2)' : 'rgba(99,102,241,0.2)',
+                    border: `1px solid ${role === 'admin' ? 'rgba(234,179,8,0.4)' : role === 'patrol' ? 'rgba(16,185,129,0.4)' : 'rgba(99,102,241,0.4)'}`,
+                    borderRadius: 5, padding: '2px 8px',
+                    color: role === 'admin' ? '#fde047' : role === 'patrol' ? '#6ee7b7' : '#a5b4fc',
+                    fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5,
+                  }}>{role}</span>
+                )}
+                <span style={{
+                  background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)',
+                  borderRadius: 5, padding: '2px 8px', color: 'rgba(255,255,255,0.6)',
+                  fontSize: '0.65rem', fontWeight: 600,
+                }}>NaviSea v1.0</span>
+              </div>
+            </div>
+            <button onClick={logout} style={{
+              background: 'rgba(220,38,38,0.2)', border: '1px solid rgba(220,38,38,0.35)',
+              borderRadius: 7, padding: '7px 14px', color: '#fca5a5',
+              fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', flexShrink: 0,
+            }}>Logout</button>
+          </div>
+          {/* Nav items */}
           {navItems.filter(n => !bottomTabs.find(b => b.to === n.to)).map(({ to, label, icon, end }) => (
             <NavLink key={to} to={to} end={end}
               onClick={() => setMoreOpen(false)}
               style={({ isActive }) => ({
                 display: 'flex', alignItems: 'center', gap: 14,
-                padding: '13px 24px', textDecoration: 'none',
+                padding: '15px 24px', textDecoration: 'none',
                 color: isActive ? '#fff' : 'rgba(148,163,184,0.8)',
                 background: isActive ? 'rgba(37,99,235,0.2)' : 'transparent',
-                fontWeight: isActive ? 700 : 500, fontSize: '0.9rem',
+                fontWeight: isActive ? 700 : 500, fontSize: '0.95rem',
                 borderLeft: isActive ? '3px solid #3b82f6' : '3px solid transparent',
               })}>
-              <span style={{ fontSize: '1.1rem' }}>{icon}</span>
+              <span style={{ fontSize: '1.2rem' }}>{icon}</span>
               <span>{label}</span>
             </NavLink>
           ))}
-          {/* Dark mode row */}
+          {/* Dark mode */}
           <div onClick={() => { toggle(); setMoreOpen(false) }} style={{
             display: 'flex', alignItems: 'center', gap: 14,
-            padding: '13px 24px', cursor: 'pointer',
-            color: 'rgba(148,163,184,0.7)', fontSize: '0.9rem',
-            borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: 4,
+            padding: '15px 24px', cursor: 'pointer',
+            color: 'rgba(148,163,184,0.7)', fontSize: '0.95rem',
+            borderTop: '1px solid rgba(255,255,255,0.06)', marginTop: 'auto',
           }}>
-            <span style={{ fontSize: '1.1rem' }}>{dark ? '☀️' : '🌙'}</span>
+            <span style={{ fontSize: '1.2rem' }}>{dark ? '☀️' : '🌙'}</span>
             <span>{dark ? 'Light Mode' : 'Dark Mode'}</span>
           </div>
         </div>
-      )}
-
-      {/* Backdrop for more drawer */}
-      {isMobile && moreOpen && (
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 48,
-          background: 'rgba(0,0,0,0.4)',
-        }} onClick={() => setMoreOpen(false)} />
       )}
 
       <AlertToast alerts={toasts} onDismiss={dismissToast} />
