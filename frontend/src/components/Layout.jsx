@@ -220,10 +220,27 @@ export default function Layout() {
           </div>
 
           {/* Right */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            {/* Status pill on mobile topbar */}
-            <div className="flex md:hidden">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {/* Mobile: role badge + logout + dark mode */}
+            <div className="flex md:hidden" style={{ alignItems: 'center', gap: 6 }}>
               {statusPill}
+              {role && (
+                <div style={{
+                  background: role === 'admin' ? 'rgba(234,179,8,0.2)' : role === 'patrol' ? 'rgba(16,185,129,0.2)' : 'rgba(99,102,241,0.2)',
+                  border: `1px solid ${role === 'admin' ? 'rgba(234,179,8,0.4)' : role === 'patrol' ? 'rgba(16,185,129,0.4)' : 'rgba(99,102,241,0.4)'}`,
+                  borderRadius: 6, padding: '2px 8px',
+                  color: role === 'admin' ? '#fde047' : role === 'patrol' ? '#6ee7b7' : '#a5b4fc',
+                  fontSize: '0.62rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5, whiteSpace: 'nowrap',
+                }}>{role}</div>
+              )}
+              <button onClick={logout} style={{
+                background: 'rgba(220,38,38,0.2)', border: '1px solid rgba(220,38,38,0.35)',
+                borderRadius: 6, padding: '4px 8px', color: '#fca5a5',
+                fontSize: '0.7rem', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap',
+              }}>Logout</button>
+              <div onClick={toggle} style={{ cursor: 'pointer', fontSize: '1rem', padding: '4px' }}>
+                {dark ? '☀️' : '🌙'}
+              </div>
             </div>
             {/* Desktop info */}
             <div className="hidden md:flex" style={{ alignItems: 'center', gap: 16 }}>
@@ -253,10 +270,6 @@ export default function Layout() {
                 background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.15)',
                 borderRadius: 6, padding: '3px 10px', color: '#fff', fontSize: '0.72rem', fontWeight: 600,
               }}>NaviSea v1.0</div>
-            </div>
-            {/* Dark mode on mobile */}
-            <div className="flex md:hidden" onClick={toggle} style={{ cursor: 'pointer', fontSize: '1.1rem', padding: '4px' }}>
-              {dark ? '☀️' : '🌙'}
             </div>
           </div>
         </header>
