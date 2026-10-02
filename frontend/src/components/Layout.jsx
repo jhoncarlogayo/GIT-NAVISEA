@@ -261,6 +261,8 @@ export default function Layout() {
           flex: 1, minHeight: 0, overflowY: 'auto',
           padding: '16px',
           background: dark ? '#0f1117' : '#f0f4f8',
+          position: 'relative',
+          zIndex: moreOpen ? 0 : 'auto',
         }}
           className="mobile-main md:p-6"
         >
