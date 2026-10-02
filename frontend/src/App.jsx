@@ -12,6 +12,9 @@ import Violations from './pages/Violations'
 import Reports from './pages/Reports'
 import AlertToast from './components/AlertToast'
 import SplashScreen from './pages/SplashScreen'
+import Login from './pages/Login'
+import ProtectedRoute from './components/ProtectedRoute'
+import { AuthProvider } from './context/AuthContext'
 import { useZoneMonitor } from './hooks/useZoneMonitor'
 import { listenAlerts } from './services/api'
 
@@ -97,9 +100,10 @@ export default function App() {
   }
 
   return (
-    <>
+    <AuthProvider>
       <Routes>
-        <Route path="/" element={<Layout unreadCount={unreadCount} onBellClick={() => navigate('/alerts')} />}>
+        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<ProtectedRoute><Layout unreadCount={unreadCount} onBellClick={() => navigate('/alerts')} /></ProtectedRoute>}>
           <Route index element={<Dashboard />} />
           <Route path="map" element={<MapView />} />
           <Route path="alerts" element={<Alerts />} />
@@ -112,6 +116,6 @@ export default function App() {
         </Route>
       </Routes>
       <AlertToast alerts={toasts} onDismiss={id => setToasts(t => t.filter(a => a.id !== id))} />
-    </>
+    </AuthProvider>
   )
 }

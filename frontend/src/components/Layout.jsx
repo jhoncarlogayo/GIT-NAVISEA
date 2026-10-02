@@ -1,6 +1,7 @@
 import { Outlet, NavLink, useLocation } from 'react-router-dom'
 import { useState, useEffect, useCallback } from 'react'
 import { useTheme } from '../context/ThemeContext'
+import { useAuth } from '../context/AuthContext'
 import { listenVessels, listenZones } from '../services/api'
 import { useAlertDetector } from '../hooks/useAlertDetector'
 import { useAlarmSound } from '../hooks/useAlarmSound'
@@ -40,6 +41,7 @@ const bottomTabs = [
 
 export default function Layout() {
   const { dark, toggle } = useTheme()
+  const { user, logout } = useAuth()
   const location = useLocation()
   const [vessels,   setVessels]   = useState([])
   const [zones,     setZones]     = useState([])
@@ -230,6 +232,14 @@ export default function Layout() {
                 Firebase Connected
               </div>
               <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '0.72rem' }}>Calapan City, Oriental Mindoro</div>
+              <div style={{ color: 'rgba(148,163,184,0.8)', fontSize: '0.72rem', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {user?.email}
+              </div>
+              <button onClick={logout} style={{
+                background: 'rgba(220,38,38,0.2)', border: '1px solid rgba(220,38,38,0.35)',
+                borderRadius: 6, padding: '3px 10px', color: '#fca5a5',
+                fontSize: '0.72rem', fontWeight: 600, cursor: 'pointer',
+              }}>Logout</button>
               <div style={{
                 background: 'rgba(255,255,255,0.12)', border: '1px solid rgba(255,255,255,0.15)',
                 borderRadius: 6, padding: '3px 10px', color: '#fff', fontSize: '0.72rem', fontWeight: 600,
