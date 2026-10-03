@@ -41,10 +41,11 @@ export function AuthProvider({ children }) {
     try {
       cred = await createUserWithEmailAndPassword(auth, email, password)
     } catch (e) {
+      console.error('Register error:', e.code, e.message)
       setError(
         e.code === 'auth/email-already-in-use' ? 'Email already in use.' :
         e.code === 'auth/weak-password'        ? 'Password must be at least 6 characters.' :
-        `Auth error: ${e.code}`
+        `Error: ${e.code}`
       )
       return
     }

@@ -20,6 +20,7 @@ export default function Login() {
   const [confirm,  setConfirm]  = useState('')
   const [role,     setRole]     = useState('staff')
   const [loading,  setLoading]  = useState(false)
+  const [showPw,   setShowPw]   = useState(false)
 
   if (user) return <Navigate to="/" replace />
 
@@ -119,17 +120,29 @@ export default function Login() {
 
           <div>
             <label style={labelStyle}>PASSWORD</label>
-            <input type="password" required autoComplete={tab === 'signin' ? 'current-password' : 'new-password'}
-              value={password} onChange={e => { setPassword(e.target.value); setError('') }}
-              placeholder="••••••••" style={inputStyle} />
+            <div style={{ position: 'relative' }}>
+              <input type={showPw ? 'text' : 'password'} required autoComplete={tab === 'signin' ? 'current-password' : 'new-password'}
+                value={password} onChange={e => { setPassword(e.target.value); setError('') }}
+                placeholder="••••••••" style={{ ...inputStyle, paddingRight: 40 }} />
+              <span onClick={() => setShowPw(s => !s)} style={{
+                position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
+                cursor: 'pointer', fontSize: '1rem', color: 'rgba(148,163,184,0.7)', userSelect: 'none',
+              }}>{showPw ? '🙈' : '👁️'}</span>
+            </div>
           </div>
 
           {tab === 'register' && (<>
             <div>
               <label style={labelStyle}>CONFIRM PASSWORD</label>
-              <input type="password" required autoComplete="new-password"
-                value={confirm} onChange={e => { setConfirm(e.target.value); setError('') }}
-                placeholder="••••••••" style={inputStyle} />
+              <div style={{ position: 'relative' }}>
+                <input type={showPw ? 'text' : 'password'} required autoComplete="new-password"
+                  value={confirm} onChange={e => { setConfirm(e.target.value); setError('') }}
+                  placeholder="••••••••" style={{ ...inputStyle, paddingRight: 40 }} />
+                <span onClick={() => setShowPw(s => !s)} style={{
+                  position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
+                  cursor: 'pointer', fontSize: '1rem', color: 'rgba(148,163,184,0.7)', userSelect: 'none',
+                }}>{showPw ? '🙈' : '👁️'}</span>
+              </div>
             </div>
 
             <div>
