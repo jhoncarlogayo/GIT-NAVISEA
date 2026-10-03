@@ -37,15 +37,22 @@ export function AuthProvider({ children }) {
 
   async function register(email, password, selectedRole) {
     setError('')
+    let cred
     try {
-      const cred = await createUserWithEmailAndPassword(auth, email, password)
-      await set(ref(db, `/users/${cred.user.uid}`), { role: selectedRole, email })
+      cred = await createUserWithEmailAndPassword(auth, email, password)
     } catch (e) {
       setError(
         e.code === 'auth/email-already-in-use' ? 'Email already in use.' :
         e.code === 'auth/weak-password'        ? 'Password must be at least 6 characters.' :
-        'Registration failed. Please try again.'
+        `Auth error: ${e.code}`
       )
+      return
+    }
+    try {
+      await set(ref(db, `/users/${cred.user.uid}`), { role: selectedRole, email })
+    } catch (e) {
+      // Account created but role save failed — still let them in, role will be null
+      console.warn('Role save failed:', e.code, e.message)
     }
   }
 
