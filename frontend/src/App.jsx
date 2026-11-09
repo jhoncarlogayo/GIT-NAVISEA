@@ -9,6 +9,7 @@ import Settings from './pages/Settings'
 import RestrictedZone from './pages/RestrictedZone'
 import WeatherPrediction from './pages/WeatherPrediction'
 import Violations from './pages/Violations'
+import Seeder from './pages/Seeder'
 import Reports from './pages/Reports'
 import AlertToast from './components/AlertToast'
 import SplashScreen from './pages/SplashScreen'
@@ -113,6 +114,7 @@ export default function App() {
           <Route path="violations" element={<Violations />} />
           <Route path="reports" element={<Reports />} />
           <Route path="settings" element={<Settings />} />
+          <Route path="seeder" element={<Seeder />} />
         </Route>
       </Routes>
       <AlertToast alerts={toasts} onDismiss={id => setToasts(t => t.filter(a => a.id !== id))} />

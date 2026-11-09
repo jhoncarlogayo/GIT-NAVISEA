@@ -5,7 +5,7 @@ const DEFAULT_LAT  = 13.4115
 const DEFAULT_LON  = 121.1803
 const DEFAULT_CITY = 'Calapan City, Oriental Mindoro'
 const API_KEY      = '093258366a1433573166053d28fb591e'
-const BASE_URL     = '/owm'
+const BASE_URL     = 'https://api.openweathermap.org/data/2.5'
 
 const owm = axios.create({ baseURL: BASE_URL })
 
