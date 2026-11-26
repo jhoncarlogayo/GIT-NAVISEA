@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { listenAlerts, listenVessels, acknowledgeAlert } from '../services/api'
+import { listenAlerts, listenVessels } from '../services/api'
+import { useNavigate } from 'react-router-dom'
 
 const SEV_CLASS = {
   critical: 'bg-red-50 text-red-600 border border-red-200',
@@ -37,6 +38,7 @@ export default function Violations() {
   const [ready,   setReady]   = useState(false)
   const [search,  setSearch]  = useState('')
   const [weekFilter, setWeekFilter] = useState('all')
+  const navigate = useNavigate()
 
   useEffect(() => {
     const u1 = listenAlerts(d  => { setAlerts(d); setReady(true) })
@@ -324,13 +326,12 @@ export default function Violations() {
                           {a.latitude && (
                             <div className="text-xs font-mono text-slate-400 mb-2">📍 {parseFloat(a.latitude).toFixed(5)}, {parseFloat(a.longitude).toFixed(5)}</div>
                           )}
-                          {a.acknowledged
-                            ? <span className="text-green-600 text-xs font-semibold">✓ Acknowledged</span>
-                            : <button onClick={() => acknowledgeAlert(a.id)}
-                                className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold w-full hover:bg-blue-700 transition-colors cursor-pointer">
-                                Acknowledge
-                              </button>
-                          }
+                          <button
+                            onClick={() => navigate(`/map?lat=${a.latitude}&lng=${a.longitude}&vessel=${encodeURIComponent(a.vesselName ?? '')}`)}
+                            className="bg-blue-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold w-full hover:bg-blue-700 transition-colors cursor-pointer"
+                          >
+                            📍 View Last Location
+                          </button>
                         </div>
                       ))}
                     </div>

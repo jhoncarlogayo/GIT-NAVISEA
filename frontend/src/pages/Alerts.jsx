@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { listenAlerts, acknowledgeAlert } from '../services/api'
+import { listenAlerts } from '../services/api'
+import { useNavigate } from 'react-router-dom'
 
 const SEV_COLOR = { critical: '#dc2626', warning: '#d97706', info: '#2563eb' }
 const SEV_BG    = { critical: '#fef2f2', warning: '#fffbeb', info: '#eff6ff' }
@@ -12,6 +13,7 @@ function fmtTime(ts) {
 export default function Alerts() {
   const [alerts, setAlerts] = useState([])
   const [ready,  setReady]  = useState(false)
+  const navigate = useNavigate()
 
   useEffect(() => {
     const unsub = listenAlerts(data => { setAlerts(data); setReady(true) })
@@ -61,15 +63,14 @@ export default function Alerts() {
               {a.message && <div className="text-xs text-slate-400 mb-3 line-clamp-2">{a.message}</div>}
 
               {/* Action */}
-              {a.acknowledged
-                ? <span className="text-green-600 text-xs font-semibold">✓ Acknowledged</span>
-                : <button
-                    onClick={() => acknowledgeAlert(a.id)}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-semibold w-full hover:bg-blue-700 transition-colors cursor-pointer"
-                  >
-                    Acknowledge
-                  </button>
-              }
+              {a.latitude && (
+                <button
+                  onClick={() => navigate(`/map?lat=${a.latitude}&lng=${a.longitude}&vessel=${encodeURIComponent(a.vesselName ?? '')}`)}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg text-xs font-semibold w-full hover:bg-blue-700 transition-colors cursor-pointer"
+                >
+                  📍 View Last Location
+                </button>
+              )}
             </div>
           ))}
         </div>

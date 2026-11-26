@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from 'react-leaflet'
+import { useSearchParams } from 'react-router-dom'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import { listenVessels, listenZones, fetchWeather } from '../services/api'
@@ -56,6 +57,14 @@ function getVesselColor(v, activeZones) {
   return '#00ff9d'
 }
 
+function FlyTo({ lat, lng }) {
+  const map = useMap()
+  useEffect(() => {
+    if (lat && lng) map.flyTo([parseFloat(lat), parseFloat(lng)], 15, { duration: 1.2 })
+  }, [lat, lng, map])
+  return null
+}
+
 function FitBounds({ vessels, done }) {
   const map = useMap()
   useEffect(() => {
@@ -95,6 +104,10 @@ export default function MapView() {
   const [layer,      setLayer]      = useState('street')
   const [tick,       setTick]       = useState(0)   // forces re-render to recheck lastSeenAt
   const [isMobile,   setIsMobile]   = useState(() => window.innerWidth < 768)
+  const [searchParams] = useSearchParams()
+  const focusLat    = searchParams.get('lat')
+  const focusLng    = searchParams.get('lng')
+  const focusVessel = searchParams.get('vessel')
   const done = useRef(false)
 
   useEffect(() => {
@@ -146,9 +159,18 @@ export default function MapView() {
 
   // ── Shared map content ──────────────────────────────────────────────────
   const mapContent = (
-    <MapContainer center={CALAPAN} zoom={12} scrollWheelZoom style={{ height: '100%', width: '100%' }}>
+    <MapContainer center={focusLat && focusLng ? [parseFloat(focusLat), parseFloat(focusLng)] : CALAPAN} zoom={focusLat ? 15 : 12} scrollWheelZoom style={{ height: '100%', width: '100%' }}>
       <TileLayer key={layer} url={TILES[layer].url} attribution={TILES[layer].attr} />
       {layer === 'satellite' && <TileLayer url={TILES.nautical.url} attribution={TILES.nautical.attr} opacity={0.7} />}
+      {focusLat && focusLng && <FlyTo lat={focusLat} lng={focusLng} />}
+      {focusLat && focusLng && (
+        <Marker position={[parseFloat(focusLat), parseFloat(focusLng)]} icon={L.divIcon({
+          html: `<div style="width:18px;height:18px;border-radius:50%;background:#ef4444;border:3px solid #fff;box-shadow:0 0 10px #ef4444"></div>`,
+          className: '', iconSize: [18, 18], iconAnchor: [9, 9],
+        })}>
+          <Popup><div style={{ fontFamily: 'Segoe UI', fontSize: 12 }}><strong>🚨 Last Violation Location</strong><br />{focusVessel && <span>Vessel: {focusVessel}<br /></span>}{parseFloat(focusLat).toFixed(5)}, {parseFloat(focusLng).toFixed(5)}</div></Popup>
+        </Marker>
+      )}
 
       {zones.map(z => {
         const col   = ZONE_COLORS[z.type] ?? ZONE_COLORS.danger

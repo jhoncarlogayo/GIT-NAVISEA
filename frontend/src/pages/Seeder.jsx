@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { ref, push, set } from 'firebase/database'
 import { db } from '../services/firebase'
 
-const LAT = 13.416588
-const LNG = 121.153922
+const LAT = 13.3500
+const LNG = 121.0800
 
 // Nov 3–6, various times
 const TIMESTAMPS = [
