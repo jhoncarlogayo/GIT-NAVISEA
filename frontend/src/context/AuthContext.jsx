@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
-import { ref, set, get } from 'firebase/database'
+import { ref, set, get, onValue, off } from 'firebase/database'
 import { auth, db } from '../services/firebase'
 
 const AuthContext = createContext(null)
@@ -8,6 +8,7 @@ const AuthContext = createContext(null)
 export function AuthProvider({ children }) {
   const [user,    setUser]    = useState(undefined)
   const [role,    setRole]    = useState(null)
+  const [users,   setUsers]   = useState([])
   const [error,   setError]   = useState('')
 
   async function fetchRole(uid) {
@@ -21,7 +22,13 @@ export function AuthProvider({ children }) {
       if (u) fetchRole(u.uid)
       else   setRole(null)
     })
-    return unsub
+    // Listen to all users for assign dropdown
+    const r = ref(db, 'users')
+    onValue(r, snap => {
+      const data = snap.val() ?? {}
+      setUsers(Object.entries(data).map(([uid, u]) => ({ uid, ...u })))
+    })
+    return () => { unsub(); off(r) }
   }, [])
 
   async function login(email, password) {
@@ -75,7 +82,7 @@ export function AuthProvider({ children }) {
   function logout() { signOut(auth) }
 
   return (
-    <AuthContext.Provider value={{ user, role, login, register, loginWithGoogle, logout, error, setError }}>
+    <AuthContext.Provider value={{ user, role, users, login, register, loginWithGoogle, logout, error, setError }}>
       {children}
     </AuthContext.Provider>
   )

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { listenVessels, listenAlerts, listenZones, listenTracking } from '../services/api'
+import { useAuth } from '../context/AuthContext'
 import StatCard from '../components/StatCard'
 
 const SEV_COLOR = { critical: '#dc2626', warning: '#d97706', info: '#2563eb' }
@@ -27,6 +28,7 @@ function timeAgo(ts) {
 }
 
 export default function Dashboard() {
+  const { user, role } = useAuth()
   const [vessels,  setVessels]  = useState([])
   const [alerts,   setAlerts]   = useState([])
   const [zones,    setZones]    = useState([])
@@ -48,6 +50,10 @@ export default function Dashboard() {
       setReady(true)
     }
   }, [])
+
+  const myAssignments = alerts.filter(a =>
+    a.assignedTo === user?.uid && a.status !== 'archived'
+  )
 
   const totalVessels   = vessels.length
   const onlineVessels  = vessels.filter(isOnlineVessel).length
@@ -87,6 +93,29 @@ export default function Dashboard() {
         <StatCard label="Total Alerts"    value={totalAlerts}    color="#d97706" icon="🔔" />
         <StatCard label="Critical Alerts" value={criticalAlerts} color="#dc2626" icon="🚨" />
       </div>
+
+      {/* My Assignments — staff/patrol only */}
+      {role !== 'admin' && myAssignments.length > 0 && (
+        <div className="card p-4 border-l-4 border-purple-500">
+          <div className="font-bold text-sm text-purple-700 dark:text-purple-300 mb-3">
+            📋 My Assignments <span className="ml-1 bg-purple-100 text-purple-700 text-xs font-bold px-2 py-0.5 rounded-full">{myAssignments.length}</span>
+          </div>
+          <div className="flex flex-col gap-2">
+            {myAssignments.map(a => (
+              <div key={a.id} className="flex items-center justify-between p-3 rounded-lg bg-purple-50 dark:bg-slate-800">
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-slate-700 dark:text-slate-200 text-sm truncate">🚢 {a.vesselName ?? '—'}</div>
+                  <div className="text-xs text-slate-400 mt-0.5">{a.zoneName ?? a.alertType?.replace('_',' ') ?? '—'} · {new Date(a.createdAt).toLocaleString('en-PH',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}</div>
+                </div>
+                <span className="text-xs font-bold px-2 py-0.5 rounded-full ml-2 flex-shrink-0"
+                  style={{ background: a.severity === 'critical' ? '#fef2f2' : '#fffbeb', color: a.severity === 'critical' ? '#dc2626' : '#d97706' }}>
+                  {a.severity?.toUpperCase()}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Recent Alerts */}
       <div className="card p-4">

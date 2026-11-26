@@ -59,9 +59,48 @@ export function addAlert(alert) {
   return push(ref(db, 'alerts'), { ...alert, acknowledged: false, createdAt: serverTimestamp() })
 }
 
+// Listen to all users (for assign dropdown)
+export function listenUsers(callback) {
+  const r = ref(db, 'users')
+  onValue(r, snap => {
+    const data = snap.val() ?? {}
+    const list = Object.entries(data).map(([uid, u]) => ({ uid, ...u }))
+    callback(list)
+  })
+  return () => off(r)
+}
+
+// Assign alert to a user
+export function assignAlert(id, uid, email) {
+  return update(ref(db, `alerts/${id}`), {
+    assignedTo:      uid,
+    assignedToEmail: email,
+    assignedAt:      Date.now(),
+    status:          'assigned',
+  })
+}
+
 // Acknowledge an alert
-export function acknowledgeAlert(id) {
-  return update(ref(db, `alerts/${id}`), { acknowledged: true })
+export function acknowledgeAlert(id, byEmail) {
+  return update(ref(db, `alerts/${id}`), {
+    acknowledged:    true,
+    acknowledgedBy:  byEmail,
+    acknowledgedAt:  Date.now(),
+    status:          'acknowledged',
+  })
+}
+
+// Auto-archive alerts acknowledged > 24hrs ago
+export async function archiveOldAlerts() {
+  const snap = await get(ref(db, 'alerts'))
+  if (!snap.exists()) return
+  const cutoff = Date.now() - 24 * 60 * 60 * 1000
+  const updates = {}
+  Object.entries(snap.val()).forEach(([id, a]) => {
+    if (a.status === 'acknowledged' && a.acknowledgedAt && a.acknowledgedAt < cutoff)
+      updates[`alerts/${id}/status`] = 'archived'
+  })
+  if (Object.keys(updates).length) return update(ref(db), updates)
 }
 
 // ── SENSOR DATA ──────────────────────────────────────────────────────────
