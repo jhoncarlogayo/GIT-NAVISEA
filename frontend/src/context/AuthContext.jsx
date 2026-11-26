@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup } from 'firebase/auth'
+import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, GoogleAuthProvider, signInWithPopup, sendEmailVerification } from 'firebase/auth'
 import { ref, set, get, onValue, off } from 'firebase/database'
 import { auth, db } from '../services/firebase'
 
@@ -34,7 +34,12 @@ export function AuthProvider({ children }) {
   async function login(email, password) {
     setError('')
     try {
-      await signInWithEmailAndPassword(auth, email, password)
+      const cred = await signInWithEmailAndPassword(auth, email, password)
+      if (!cred.user.emailVerified) {
+        await signOut(auth)
+        setError('Please verify your email first. Check your inbox.')
+        return
+      }
     } catch (e) {
       setError(e.code === 'auth/invalid-credential' || e.code === 'auth/wrong-password' || e.code === 'auth/user-not-found'
         ? 'Invalid email or password.'
@@ -48,7 +53,6 @@ export function AuthProvider({ children }) {
     try {
       cred = await createUserWithEmailAndPassword(auth, email, password)
     } catch (e) {
-      console.error('Register error:', e.code, e.message)
       setError(
         e.code === 'auth/email-already-in-use' ? 'Email already in use.' :
         e.code === 'auth/weak-password'        ? 'Password must be at least 6 characters.' :
@@ -58,20 +62,23 @@ export function AuthProvider({ children }) {
     }
     try {
       await set(ref(db, `/users/${cred.user.uid}`), { role: selectedRole, email })
+      await sendEmailVerification(cred.user)
     } catch (e) {
-      // Account created but role save failed — still let them in, role will be null
-      console.warn('Role save failed:', e.code, e.message)
+      console.warn('Post-register error:', e.code, e.message)
     }
+    await signOut(auth)
+    return 'verify'
   }
 
   async function loginWithGoogle() {
     setError('')
     try {
       const cred = await signInWithPopup(auth, new GoogleAuthProvider())
-      // If new Google user, assign staff role by default
       const snap = await get(ref(db, `/users/${cred.user.uid}/role`))
       if (!snap.exists()) {
-        await set(ref(db, `/users/${cred.user.uid}`), { role: 'staff', email: cred.user.email })
+        await cred.user.delete()
+        setError('You must create an account first before using Google sign-in.')
+        return
       }
     } catch (e) {
       if (e.code !== 'auth/popup-closed-by-user')

@@ -21,6 +21,7 @@ export default function Login() {
   const [role,     setRole]     = useState('staff')
   const [loading,  setLoading]  = useState(false)
   const [showPw,   setShowPw]   = useState(false)
+  const [verified, setVerified] = useState(false)
 
   if (user) return <Navigate to="/" replace />
 
@@ -30,8 +31,12 @@ export default function Login() {
     e.preventDefault()
     if (tab === 'register' && password !== confirm) { setError('Passwords do not match.'); return }
     setLoading(true)
-    if (tab === 'signin') await login(email, password)
-    else                  await register(email, password, role)
+    if (tab === 'signin') {
+      await login(email, password)
+    } else {
+      const result = await register(email, password, role)
+      if (result === 'verify') setVerified(true)
+    }
     setLoading(false)
   }
 
@@ -53,6 +58,22 @@ export default function Login() {
         borderRadius: 16, padding: '36px 32px',
         backdropFilter: 'blur(12px)', boxShadow: '0 24px 60px rgba(0,0,0,0.4)',
       }}>
+
+        {verified ? (
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '3rem', marginBottom: 16 }}>📧</div>
+            <div style={{ fontWeight: 800, fontSize: '1.1rem', color: '#fff', marginBottom: 10 }}>Verify your email</div>
+            <div style={{ fontSize: '0.85rem', color: 'rgba(148,163,184,0.8)', marginBottom: 24, lineHeight: 1.6 }}>
+              A verification link has been sent to <strong style={{ color: '#60a5fa' }}>{email}</strong>.<br />
+              Please check your inbox and click the link before signing in.
+            </div>
+            <button onClick={() => { setVerified(false); switchTab('signin') }} style={{
+              width: '100%', padding: '11px', borderRadius: 8, border: 'none', cursor: 'pointer',
+              background: 'linear-gradient(90deg, #2563eb, #1d4ed8)', color: '#fff',
+              fontWeight: 700, fontSize: '0.9rem',
+            }}>Go to Sign In</button>
+          </div>
+        ) : (<>
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: 24 }}>
           <div style={{
@@ -185,6 +206,7 @@ export default function Login() {
         <div style={{ textAlign: 'center', marginTop: 20, fontSize: '0.72rem', color: 'rgba(148,163,184,0.5)' }}>
           Access restricted to authorized personnel only
         </div>
+      </>)}
       </div>
     </div>
   )
