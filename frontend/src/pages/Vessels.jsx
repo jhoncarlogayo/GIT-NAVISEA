@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { listenVessels, addVessel, updateVessel, deleteVessel } from '../services/api'
+import { useAuth } from '../context/AuthContext'
 
 const OFFLINE_MS = 2 * 60 * 1000
 const getStatus = v => {
@@ -15,6 +16,8 @@ const STATUS_STYLE = {
 const EMPTY = { name: '', mmsi: '', type: 'fishing' }
 
 export default function Vessels() {
+  const { role } = useAuth()
+  const isAdmin = role === 'admin'
   const [vessels,   setVessels]   = useState([])
   const [ready,     setReady]     = useState(false)
   const [showForm,  setShowForm]  = useState(false)
@@ -72,7 +75,7 @@ export default function Vessels() {
           <h1 className="text-xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">🚢 Vessels</h1>
           <span className="text-xs text-slate-400">🔴 Live — Firebase Realtime Database</span>
         </div>
-        {!showForm && (
+        {!showForm && isAdmin && (
           <button onClick={openAdd} className="btn-primary">+ Add</button>
         )}
       </div>
@@ -150,16 +153,18 @@ export default function Vessels() {
                 <span className="text-xs text-slate-400">
                   {v.lastSeenAt ? `Last seen ${new Date(v.lastSeenAt).toLocaleTimeString()}` : 'Never seen'}
                 </span>
-                <div className="flex gap-2">
-                  <button onClick={() => openEdit(v)}
-                    className="bg-blue-50 text-blue-600 border border-blue-200 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-blue-100 transition-colors cursor-pointer">
-                    Edit
-                  </button>
-                  <button onClick={() => handleDelete(v.id, v.name)}
-                    className="bg-red-50 text-red-500 border border-red-200 px-3 py-1.5 rounded-lg text-xs hover:bg-red-100 transition-colors cursor-pointer">
-                    🗑
-                  </button>
-                </div>
+                {isAdmin && (
+                  <div className="flex gap-2">
+                    <button onClick={() => openEdit(v)}
+                      className="bg-blue-50 text-blue-600 border border-blue-200 px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-blue-100 transition-colors cursor-pointer">
+                      Edit
+                    </button>
+                    <button onClick={() => handleDelete(v.id, v.name)}
+                      className="bg-red-50 text-red-500 border border-red-200 px-3 py-1.5 rounded-lg text-xs hover:bg-red-100 transition-colors cursor-pointer">
+                      🗑
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           )
