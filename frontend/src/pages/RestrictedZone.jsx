@@ -3,6 +3,7 @@ import { MapContainer, TileLayer, Circle, Marker, Popup, useMapEvents } from 're
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 import { listenZones, addZone, deleteZone, updateZone } from '../services/api'
+import { useAuth } from '../context/AuthContext'
 
 delete L.Icon.Default.prototype._getIconUrl
 L.Icon.Default.mergeOptions({
@@ -25,6 +26,8 @@ function MapClickHandler({ onMapClick, picking }) {
 }
 
 export default function RestrictedZone() {
+  const { role } = useAuth()
+  const isAdmin = role === 'admin'
   const [zones,     setZones]     = useState([])
   const [ready,     setReady]     = useState(false)
   const [showForm,  setShowForm]  = useState(false)
@@ -217,11 +220,13 @@ export default function RestrictedZone() {
               </div>
             )}
 
-            <div className="flex gap-2">
-              <button onClick={() => handleToggle(z)} className="btn-secondary text-xs px-2.5 py-1">{z.active ? '⏸ Disable' : '▶ Enable'}</button>
-              <button onClick={() => handleEdit(z)} className="btn-secondary text-xs px-2.5 py-1">✏️ Edit</button>
-              <button onClick={() => handleDelete(z.id, z.name)} className="text-xs px-2.5 py-1 rounded-lg border border-red-200 bg-red-50 text-red-500 hover:bg-red-100 cursor-pointer transition-colors">🗑</button>
-            </div>
+            {isAdmin && (
+              <div className="flex gap-2">
+                <button onClick={() => handleToggle(z)} className="btn-secondary text-xs px-2.5 py-1">{z.active ? '⏸ Disable' : '▶ Enable'}</button>
+                <button onClick={() => handleEdit(z)} className="btn-secondary text-xs px-2.5 py-1">✏️ Edit</button>
+                <button onClick={() => handleDelete(z.id, z.name)} className="text-xs px-2.5 py-1 rounded-lg border border-red-200 bg-red-50 text-red-500 hover:bg-red-100 cursor-pointer transition-colors">🗑</button>
+              </div>
+            )}
           </div>
         )
       })}
@@ -239,9 +244,11 @@ export default function RestrictedZone() {
             Vessel within <strong>20m</strong> of zone edge → ⚠️ Warning &nbsp;|&nbsp; Inside zone → 🚨 Breach
           </p>
         </div>
-        <button onClick={() => { setShowForm(v => !v); setEditId(null); setForm(EMPTY); setFormError(null) }} className="btn-primary">
-          {showForm && !editId ? '✕ Cancel' : '+ Add Zone'}
-        </button>
+        {isAdmin && (
+          <button onClick={() => { setShowForm(v => !v); setEditId(null); setForm(EMPTY); setFormError(null) }} className="btn-primary">
+            {showForm && !editId ? '✕ Cancel' : '+ Add Zone'}
+          </button>
+        )}
       </div>
 
       {formPanel}
@@ -272,9 +279,11 @@ export default function RestrictedZone() {
           <h1 className="text-xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">🚫 Zones</h1>
           <p className="text-xs text-slate-400 mt-0.5">20m warning · Inside = breach</p>
         </div>
-        <button onClick={() => { setShowForm(v => !v); setEditId(null); setForm(EMPTY); setFormError(null) }} className="btn-primary">
-          {showForm && !editId ? '✕' : '+ Add'}
-        </button>
+        {isAdmin && (
+          <button onClick={() => { setShowForm(v => !v); setEditId(null); setForm(EMPTY); setFormError(null) }} className="btn-primary">
+            {showForm && !editId ? '✕' : '+ Add'}
+          </button>
+        )}
       </div>
 
       {formPanel}
